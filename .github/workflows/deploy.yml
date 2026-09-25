@@ -22,3 +22,15 @@ jobs:
 
       - name: Build application
         run: ./mvnw clean package -DskipTests
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/order-service
+            git pull origin main
+            ./mvnw clean package -DskipTests
+            sudo docker compose up --build -d
