@@ -11,7 +11,7 @@ services:
       - "5432:5432"
 
   order-service:
-    build: .
+    image: 186225725686.dkr.ecr.eu-north-1.amazonaws.com/order-service:latest
     container_name: order-service-container
     ports:
       - "8080:8080"
