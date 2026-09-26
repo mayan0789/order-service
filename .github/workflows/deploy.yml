@@ -47,9 +47,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-		  script: |
-		    cd ~/order-service
-		    git pull origin main
-		    aws ecr get-login-password --region eu-north-1 | sudo docker login --username AWS --password-stdin 186225725686.dkr.ecr.eu-north-1.amazonaws.com
-		    sudo docker compose pull
-		    sudo docker compose up -d
+          script: |
+            cd ~/order-service
+            git pull origin main
+            aws ecr get-login-password --region eu-north-1 | sudo docker login --username AWS --password-stdin 186225725686.dkr.ecr.eu-north-1.amazonaws.com
+            sudo docker compose pull
+            sudo docker compose up -d
