@@ -7,6 +7,10 @@ on:
 
 jobs:
   build:
+    permissions:
+      id-token: write
+      contents: read
+
     runs-on: ubuntu-latest
 
     steps:
@@ -23,14 +27,29 @@ jobs:
       - name: Build application
         run: ./mvnw clean package -DskipTests
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::186225725686:role/GitHubActions-ECR-Role
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t 186225725686.dkr.ecr.eu-north-1.amazonaws.com/order-service:latest .
+          docker push 186225725686.dkr.ecr.eu-north-1.amazonaws.com/order-service:latest
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~/order-service
-            git pull origin main
-            ./mvnw clean package -DskipTests
-            sudo docker compose up --build -d
+		  script: |
+		    cd ~/order-service
+		    git pull origin main
+		    aws ecr get-login-password --region eu-north-1 | sudo docker login --username AWS --password-stdin 186225725686.dkr.ecr.eu-north-1.amazonaws.com
+		    sudo docker compose pull
+		    sudo docker compose up -d
